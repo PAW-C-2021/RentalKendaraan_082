@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 #nullable disable
 
@@ -13,7 +14,12 @@ namespace RentalKendaraan.Models
         }
 
         public int IdKendaraan { get; set; }
+
+
+        [Required(ErrorMessage = "Nama kendaraan tidak boleh kosong")]
         public string NamaKendaraan { get; set; }
+        
+        
         public string NoPolisi { get; set; }
         public string NoStnk { get; set; }
         public int? IdJenisKendaraan { get; set; }
