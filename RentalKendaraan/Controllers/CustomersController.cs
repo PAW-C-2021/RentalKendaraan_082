@@ -19,7 +19,7 @@ namespace RentalKendaraan.Controllers
         }
 
         // GET: Customers
-        public async Task<IActionResult> Index(string ktsd, string searchString)
+        public async Task<IActionResult> Index(string ktsd, string searchString, string sortOrder, string currentFilter, int? pageNumber)
         {
             var ktsdList = new List<string>();
             var ktsdQuery = from d in _context.Customers orderby d.NamaCustomer select d.NamaCustomer;
@@ -35,7 +35,44 @@ namespace RentalKendaraan.Controllers
                 menu = menu.Where(s => s.NamaCustomer.Contains(searchString) || s.Nik.Contains(searchString)
                 || s.Alamat.Contains(searchString) || s.NoHp.Contains(searchString));
             }
-            return View(await menu.ToListAsync());
+
+            int pageSize = 5;
+
+            //membuat paged list
+            ViewData["CurrentSort"] = sortOrder;
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+            ViewData["CurrentFilter"] = searchString;
+
+
+
+            //untuk sorting
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["NIKSortParm"] = sortOrder == "NIK" ? "NIK_desc" : "NIK";
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    menu = menu.OrderByDescending(s => s.NamaCustomer);
+                    break;
+                case "NIK":
+                    menu = menu.OrderBy(s => s.Nik);
+                    break;
+                case "NIK_desc":
+                    menu = menu.OrderByDescending(s => s.Nik);
+                    break;
+                default: //name ascending
+                    menu = menu.OrderBy(s => s.NamaCustomer);
+                    break;
+            }
+
+            return View(await PaginatedList<Customer>.CreateAsync(menu.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Customers/Details/5
